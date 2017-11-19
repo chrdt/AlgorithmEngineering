@@ -1,10 +1,8 @@
+from __future__ import print_function
 import argparse
-import random
 
 import abc
-import os
 
-import sys
 from scapy.all import *
 from scapy.layers.l2 import Ether, ARP, Dot3
 from scapy.utils import PcapNgReader, wrpcap
@@ -51,12 +49,12 @@ class AverageFrameLength(PCAPProcessing):
     """
 
     def finalize(self):
-        print "{},cnt,avg len".format(self.frame_groups)
+        print("{},cnt,avg len".format(self.frame_groups))
         for _frame_group in self._avg_frame_len:
             self._avg_frame_len[_frame_group] /= self._frame_count[_frame_group]
-            print "{},{},{}".format(",".join(map(str, _frame_group)),
+            print("{},{},{}".format(",".join(map(str, _frame_group)),
                                     self._frame_count[_frame_group],
-                                    self._avg_frame_len[_frame_group])
+                                    self._avg_frame_len[_frame_group]))
 
     def process(self, frame):
         _group_attributes = ()
@@ -184,7 +182,7 @@ if __name__ == '__main__':
                         help='dump frames to console')
 
     args = parser.parse_args()
-    print args
+    print(args)
     if not os.path.exists(args.input):
         sys.stderr.writelines('file not found: {}\nabort.\n'.format(args.input))
         sys.exit(1)
