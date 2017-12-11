@@ -10,25 +10,20 @@ class HashTable(object):
 
     @abc.abstractmethod
     def insert(self, key, value):
-        # type: (int ,int) -> None
-        pass
-
-    @abc.abstractmethod
-    def delete(self, key):
-        # type: (int) -> None
         pass
 
     @abc.abstractmethod
     def search(self, key):
-        # type: (int) -> int
+        pass
+
+    @abc.abstractmethod
+    def contains(self, key):
         pass
 
     @abc.abstractmethod
     def pprint(self):
-        # type: () -> None
         pass
 
     @abc.abstractmethod
     def tosequence(self):
-        # type: () -> str
         pass

@@ -24,7 +24,7 @@ def timer(func):
 
 @timer
 def process_file(path):
-    hashtable = CuckooHash(1000)
+    hashtable = CuckooHash(1039)
     with open(path, 'r') as file:
         for line in file:
             try:
