@@ -54,7 +54,7 @@ if __name__ == '__main__':
     avg_graph = PlotLine()
     extremes_graph = PlotBox()
 
-    basic_path = "benchmarks/RandomSequencesRange256/"
+    basic_path = "../../benchmarks/RandomSequencesRange256/"
     sub_paths = ["randomSeq_{}M_256_int/".format(i) for i in range(2, 11, 2)]
 
     average_runtimes, deviations = [], []

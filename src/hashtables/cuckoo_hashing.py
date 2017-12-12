@@ -12,16 +12,16 @@ class CuckooHash(HashTable):
         self.size = size
         self._elementcount = 0
         self._maxloop = int(log(size))
-        self._table2 = []
-        self._table1 = []
+        self._table2 = [None]*size
+        self._table1 = [None]*size
         self._hf2 = universal_hash(size)
         self._hf1 = universal_hash(size)
 
     def reset(self):
         self._elementcount = 0
         self._maxloop = int(log(self.size))
-        self._table2 = []
-        self._table1 = []
+        self._table2 = [None]*self.size
+        self._table1 = [None]*self.size
         self._hf2 = universal_hash(self.size)
         self._hf1 = universal_hash(self.size)
 
@@ -29,6 +29,7 @@ class CuckooHash(HashTable):
         addr1 = self._hf1(key)
         addr2 = self._hf2(key)
 
+        """
         if self._table1[addr1].key == key:
             print("\tFound equal key {}".format(key))
             # TODO: compare values here
@@ -38,25 +39,26 @@ class CuckooHash(HashTable):
             print("\tFound equal key {}".format(key))
             # TODO: compare values here
             return
+        """
 
         for _ in range(self._maxloop):
             hashaddr = self._hf1(key)
 
-            try:
+            if self._table1[hashaddr]:
                 oldkey = self._table1[hashaddr].key
                 oldval = self._table1[hashaddr].value
                 self._table1[hashaddr] = self.entry(key, value)
-            except IndexError:
+            else:
                 self._table1[hashaddr] = self.entry(key, value)
                 self.ckeck_for_rehash_and_resize()
                 return
 
             hashaddr = self._hf2(oldkey)
-            try:
+            if self._table2[hashaddr]:
                 key = self._table2[hashaddr].key
                 value = self._table2[hashaddr].value
                 self._table2[hashaddr] = self.entry(oldkey, oldval)
-            except IndexError:
+            else:
                 self._table2[hashaddr] = self.entry(oldkey, oldval)
                 self.ckeck_for_rehash_and_resize()
                 return
@@ -66,8 +68,8 @@ class CuckooHash(HashTable):
         self.insert(key, value)
 
     def rehash(self):
-        ht1 = self._table1[:]
-        ht2 = self._table2[:]
+        ht1 = [entry for entry in self._table1[:] if entry]
+        ht2 = [entry for entry in self._table2[:] if entry]
         self.reset()
 
         for entry in ht1 + ht2:
@@ -76,7 +78,7 @@ class CuckooHash(HashTable):
     def ckeck_for_rehash_and_resize(self):
         self._elementcount += 1
         if self._elementcount > self.size // 2:
-            print("\tRehashing and Resizing due to load factor {}".format(self.size//self._elementcount))
+            print("\tRehashing and Resizing with size={} and elemencount={}".format(self.size, self._elementcount))
             self.size *= 2
             self.rehash()
 
@@ -98,13 +100,15 @@ class CuckooHash(HashTable):
     def pprint(self):
         print("------ TABLE 1:")
         for i in range(self.size):
-            field = self._table1[i]
-            print("{:^2}: ({:^3}, {:^3})".format(i, field.key, field.value))
+            if self._table1[i]:
+                field = self._table1[i]
+                print("{:^2}: ({:^3}, {:^3})".format(i, field.key, field.value))
 
         print("\n------ TABLE 2:")
         for i in range(self.size):
-            field = self._table2[i]
-            print("{:^2}: ({:^3}, {:^3})".format(i, field.key, field.value))
+            if self._table2[i]:
+                field = self._table2[i]
+                print("{:^2}: ({:^3}, {:^3})".format(i, field.key, field.value))
 
     def tosequence(self):
         res = ''
@@ -120,8 +124,8 @@ class CuckooHash(HashTable):
 
 
 if __name__ == '__main__':
-    ht = CuckooHash(10)
-    ht.pprint()
-    for i in range(14):
-        ht.insert(i, i)
-    ht.pprint()
+    #ht = dict()
+    ht = CuckooHash(8)
+    for i in range(1000000):
+        ht.insert(i,i)
+    # ht.pprint()
