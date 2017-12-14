@@ -3,18 +3,24 @@ from __future__ import print_function
 
 from random import randint
 from math import sqrt
+from primes import PRIMES
+from itertools import dropwhile
 
 
-def multiplicative_hash(x, p=0):
+def multiplicative_hash(x, k=2654435761, p=0):
     """
     Uses Knuth's multiplicative hashing
     :param x: integer that is to be hashed
     :param p: integer that parametrizes the shift
     :return: hash value of x
     """
+    """
+    y = (root(5)-1)/2
+    lambda key : floor(x*((y*key)%1))
+    """
     assert 0 <= p <= 32
 
-    knuth = long(2654435761)
+    knuth = long(k)
     y = long(x)
     return (y * knuth) >> (32 - p)  # TODO: needs modulo or sth
 
@@ -26,9 +32,19 @@ def universal_hash(m):
     :return: a random hash function
     """
     p = next_prime(m)
-    a = randint(1, p - 1)
+    a = randint(2, p - 1)
     b = randint(1, p - 1)
-    return lambda x: ((a * x + b) % p) % m
+    return lambda x: ((a * x + b) % p) & (m-1)
+
+
+def next_prime_hard(n):
+    """
+    Uses a list of pre-calculated primes
+    :param n: integer
+    :return: a random prime chosen of the next 20 primes after n
+    """
+    index = randint(1, 20)
+    return dropwhile(lambda x: x <= n, PRIMES)[index]
 
 
 def next_prime(n):
@@ -38,7 +54,7 @@ def next_prime(n):
     :return: a prime that is larger than n
     """
     p = n+1
-    q = n * 3
+    q = n*3
     for _ in xrange((q - p) ** 2 + 20):
         i = randint(p, q) | 1
         if is_prime(i):
