@@ -7,19 +7,7 @@ import math
 
 from src.hashtables.cuckoo_hashing import CuckooHash
 from src.plotter.runtime_plot import PlotBox, PlotLine
-
-from functools import wraps
-from time import time
-
-
-def timer(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        start = time()
-        func(*args, **kwargs)
-        end = time()
-        return end-start
-    return wrapper
+from src.util.timer import timer
 
 
 @timer
