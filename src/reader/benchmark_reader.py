@@ -6,23 +6,26 @@ import sys
 import math
 
 from src.hashtables.cuckoo_hashing import CuckooHash
+from src.hashtables.bucketized_cuckoo_hashing import BucketizedCuckooHash
 from src.plotter.runtime_plot import PlotBox, PlotLine
 from src.util.timer import timer
 
 
 @timer
 def process_file(path):
-    hashtable = CuckooHash(1039)
+    hashtable = BucketizedCuckooHash(64)
     with open(path, 'r') as file:
         for line in file:
             try:
-                num = int(line)
+                num = int(line.translate(None, ":.-"), 16)
             except ValueError:
                 continue
+            if num == 0:
+                num = 1
+            if not hashtable.contains(num):
+                hashtable.insert(num, 1)
 
-            hashtable.insert(num, 1)
-
-    # return hashtable.tosequence()
+    x = hashtable.tosequence()
 
 
 if __name__ == '__main__':
@@ -42,8 +45,8 @@ if __name__ == '__main__':
     avg_graph = PlotLine()
     extremes_graph = PlotBox()
 
-    basic_path = "../../benchmarks/RandomSequencesRange256/"
-    sub_paths = ["randomSeq_{}M_256_int/".format(i) for i in range(2, 11, 2)]
+    basic_path = "../../benchmarks/pcapSim/"
+    sub_paths = ["{}M/".format(i) for i in range(2, 11, 2)]
 
     average_runtimes, deviations = [], []
 

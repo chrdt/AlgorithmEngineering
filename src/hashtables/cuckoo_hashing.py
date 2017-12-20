@@ -1,12 +1,10 @@
 #!/usr/bin/env python2
 from __future__ import print_function
-from random import randint
 from math import log
 import numpy
 
 from hashtable import HashTable
 from src.util.hash_functions import universal_hash
-from src.util.timer import timer
 
 
 class CuckooHash(HashTable):
@@ -23,7 +21,7 @@ class CuckooHash(HashTable):
         self._hf1 = universal_hash(size)
         self._hf2 = universal_hash(size)
         self._stash = numpy.full(8192, 0, dtype=self.entry)
-        self._stashf = lambda x : x % 8192
+        self._stashf = lambda x: x % 8192
 
     def reset(self):
         self._elementcount = 0
@@ -80,10 +78,10 @@ class CuckooHash(HashTable):
         self.rehash()
         self.insert(key, value)
         """
-    
+
     def rehash(self):
-        ht1 = [entry for entry in self._table1[:] if entry]
-        ht2 = [entry for entry in self._table2[:] if entry]
+        ht1 = (entry for entry in self._table1 if entry)
+        ht2 = (entry for entry in self._table2 if entry)
         self.reset()
 
         for entry in ht1 + ht2:
@@ -98,49 +96,40 @@ class CuckooHash(HashTable):
 
     def search(self, key):
         addr1 = self._hf1(key)
-        addr2 = self._hf2(key)
-
         if self._table1[addr1].key == key:
             return self._table1[addr1].value
 
+        addr2 = self._hf2(key)
         if self._table1[addr2].key == key:
             return self._table1[addr2].value
 
-        return -1
+        return 0
 
     def contains(self, key):
         return self._table1[self._hf1(key)].key == key or self._table2[self._hf2(key)].key == key
 
     def pprint(self):
         print("------ TABLE 1:")
-        for i in range(self.size):
-            if self._table1[i]:
-                field = self._table1[i]
-                print("{:^2}: ({:^3}, {:^3})".format(i, field.key, field.value))
+        for index in range(self.size):
+            if self._table1[index]:
+                field = self._table1[index]
+                print("{:^2}: ({:^3}, {:^3})".format(index, field.key, field.value))
 
         print("\n------ TABLE 2:")
-        for i in range(self.size):
-            if self._table2[i]:
-                field = self._table2[i]
-                print("{:^2}: ({:^3}, {:^3})".format(i, field.key, field.value))
+        for index in range(self.size):
+            if self._table2[index]:
+                field = self._table2[index]
+                print("{:^2}: ({:^3}, {:^3})".format(index, field.key, field.value))
 
     def tosequence(self):
-        res = ''
-        for entry in self._table1:
-            if entry.key:
-                res += str(entry.key) + "\n"
+        res = [str(entry.key) for entry in self._table1 if entry.key] \
+            + [str(entry.key) for entry in self._table2 if entry.key]
 
-        for entry in self._table2:
-            if entry.key:
-                res += str(entry.key) + "\n"
-
-        return res
+        return "\n".join(res)
 
 
 if __name__ == '__main__':
-    #ht = dict()
     ht = CuckooHash(64)
     for i in range(1000000):
-        ht.insert(i,i)
-
-    # ht.pprint()
+        ht.insert(i, i)
+    x = ht.tosequence()
