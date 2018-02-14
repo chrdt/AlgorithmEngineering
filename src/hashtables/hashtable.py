@@ -8,6 +8,9 @@ class HashTable(object):
     entry = namedtuple("entry", ["key", "value"])
     bottom = entry(None, None)
 
+    class InsertionException(Exception):
+        pass
+
     @abc.abstractmethod
     def insert(self, key, value):
         pass
