@@ -37,20 +37,6 @@ class BucketTable(object):
         # return len([curr for curr in bucket[1:bucket_index] if curr == key])
         return any((curr == key for curr in bucket[1:bucket_index]))
 
-    def search(self, key):
-        addr = self._hf(key)
-
-        try:
-            bucket = self._table[addr]
-            bucket_index = bucket[0]
-        except IndexError:
-            return 0
-
-        for index, curr in enumerate(bucket[1:bucket_index], start=1):
-            if curr == key:
-                return bucket[index]
-        return 0
-
     def insert(self, key, value):
         addr = self._hf(key)
 
@@ -90,11 +76,10 @@ class BucketizedCuckooHash(HashTable):
     def __init__(self, size):
         self.size = size
         self._elementcount = 0
-        self._maxloop = int(log(size))
+        self._maxloop = int(log(4*size))
         self._table1 = BucketTable(size)
         self._table2 = BucketTable(size)
         self._stash = dict()
-        self._stashf = lambda x: x % 8192
 
     def insert(self, key, value):
         for _ in xrange(self._maxloop):
@@ -109,14 +94,14 @@ class BucketizedCuckooHash(HashTable):
                 return
 
         print("\tStashing key {} and value {}".format(key, value))
-        self.pprint()
+        # self.pprint()
         self._stash[key] = value
 
     def rehash(self):
         entries1 = self._table1.items()
         entries2 = self._table2.items()
         self._elementcount = 0
-        self._maxloop = int(log(self.size))
+        self._maxloop = int(log(4*self.size))
         self._table1 = BucketTable(self.size)
         self._table2 = BucketTable(self.size)
 
@@ -125,23 +110,21 @@ class BucketizedCuckooHash(HashTable):
 
     def ckeck_for_rehash_and_resize(self):
         self._elementcount += 1
-        if self._elementcount > 4*self.size:
+        if self._elementcount > 6*self.size:
             print("\tRehashing and Resizing with size={} and elemencount={}".format(self.size, self._elementcount))
             self.size *= 2
             self.rehash()
 
-    def search(self, key):
-        return self._table1.search(key) or self._table2.search(key) or self._stash[key]
-
     def contains(self, key):
         return self._table1.contains(key) or self._table2.contains(key) or key in self._stash
 
-    def tosequence(self):
-        entries1 = self._table1.items()
-        entries2 = self._table2.items()
-        entries3 = ((key, self._stash[key]) for key in self._stash)
+    def entries(self):
+        entries1 = (key for key, _ in self._table1.items())
+        entries2 = (key for key, _ in self._table1.items())
+        entries3 = self._stash.keys()
 
-        return "\n".join(str(key) for key, _ in chain(entries1, entries2, entries3))
+        for key in chain(entries1, entries2, entries3):
+            yield key
 
     def pprint(self):
         print("-------------- TABLE1:")
@@ -159,4 +142,4 @@ if __name__ == '__main__':
     for i in range(1, 1000000):
         ht.insert(i, i)
         ht.contains(i)
-    x = ht.tosequence()
+    x = ht.entries()

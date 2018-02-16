@@ -1,4 +1,3 @@
-from __future__ import print_function
 import abc
 from collections import namedtuple
 
@@ -16,10 +15,6 @@ class HashTable(object):
         pass
 
     @abc.abstractmethod
-    def search(self, key):
-        pass
-
-    @abc.abstractmethod
     def contains(self, key):
         pass
 
@@ -28,5 +23,5 @@ class HashTable(object):
         pass
 
     @abc.abstractmethod
-    def tosequence(self):
+    def entries(self):
         pass

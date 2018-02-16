@@ -1,6 +1,3 @@
-#!/usr/bin/env python2
-from __future__ import print_function
-
 from random import randint
 from math import sqrt
 from primes import PRIMES
@@ -35,16 +32,6 @@ def universal_hash(m):
     a = randint(2, p - 1)
     b = randint(1, p - 1)
     return lambda x: ((a * x + b) % p) & (m-1)
-
-
-def next_prime_hard(n):
-    """
-    Uses a list of pre-calculated primes
-    :param n: integer
-    :return: a random prime chosen of the next 20 primes after n
-    """
-    index = randint(1, 20)
-    return dropwhile(lambda x: x <= n, PRIMES)[index]
 
 
 def next_prime(n):
@@ -87,6 +74,17 @@ def is_prime(n):
         w = 6 - w
 
     return True
+
+
+def next_prime_hard(n):
+    """
+    Uses a list of pre-calculated primes
+    There is most likely a much more efficient way to do this
+    :param n: integer
+    :return: a random prime chosen of the next 20 primes after n
+    """
+    index = randint(1, 20)
+    return dropwhile(lambda x: x <= n, PRIMES)[index]
 
 
 def sieve_of_atkin(limit):

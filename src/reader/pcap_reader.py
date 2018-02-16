@@ -1,12 +1,15 @@
 #!/usr/bin/env python2
 from __future__ import print_function
 import argparse
-
 import abc
 
 from scapy.all import *
 from scapy.layers.l2 import Ether, ARP, Dot3
 from scapy.utils import PcapNgReader, wrpcap
+from src.hashtables.bucketized_cuckoo_hashing import BucketizedCuckooHash
+from src.hashtables.cuckoo_hashing import CuckooHash
+from src.util.timer import timer
+from time import time
 
 
 class PCAPProcessing(object):
@@ -136,11 +139,36 @@ class ExtractMACAddresses(PCAPProcessing):
         self._mac_addresses = {}
 
 
-class DumpFrame(PCAPProcessing):
+class InsertHashTable():
     """
-    dump frame to console
+    the actual class, that is used for this project
+    others are used for further analyzation of pcaps
     """
+    def finalize(self):
+        print("Done:" + str(self.insertion_time))
 
+    def process(self, frame):
+        start = time()
+        try:
+            src_mac = frame[Ether].src
+        except IndexError:
+            try:
+                src_mac = frame[Dot3].src
+            except IndexError:
+                return
+
+
+        mac_as_int = int(src_mac.translate(None, ":.-"), 16)
+        if not self.hashtable.contains(mac_as_int):
+            self.hashtable.insert(mac_as_int, 1)
+        self.insertion_time += time()-start
+
+    def __init__(self):
+        self.hashtable = CuckooHash(8)
+        self.insertion_time = 0
+
+
+class DumpFrame(PCAPProcessing):
     def finalize(self):
         pass
 
@@ -148,15 +176,10 @@ class DumpFrame(PCAPProcessing):
         frame.show()
 
 
+@timer
 def _process_file(input_file, actions):
-    frm_num = 0
     with PCapReader(input_file) as reader:
-
         for frame in reader.get_frame():
-
-            frm_num += 1
-            # frame.show()
-            # print 'process frame {}...'.format(frm_num)
             for action in actions:
                 action.process(frame)
 
@@ -165,41 +188,16 @@ def _process_file(input_file, actions):
 
 
 if __name__ == '__main__':
+    """
+    TODO: re-implement argparse to be able to chain differenct actions
+    """
 
-    parser = argparse.ArgumentParser(description=
-                                     'Analyse and rework pcap traces')
+    basic_path = "../../benchmarks/pcapReal/4SICS-GeekLounge-151022.pcap"
 
-    parser.add_argument('input',
-                        help='input file to be processed')
-    parser.add_argument('--output', '-o',
-                        help='an integer for the accumulator')
-    parser.add_argument('--extract-mac-addresses', '-x',
-                        help='extract list of all MAC addresses to given file')
-    parser.add_argument('--average-frame-length', '-f',
-                        help='calculate the average frame length grouped by the given'
-                             ' attributes (None, TCP-Port, Ethernet-Type)'
-                             ', for example -f TCP-Port,Ethernet-Type')
-    parser.add_argument('--dump', '-d', action='store_true',
-                        help='dump frames to console')
-
-    args = parser.parse_args()
-    print(args)
-    if not os.path.exists(args.input):
-        sys.stderr.writelines('file not found: {}\nabort.\n'.format(args.input))
+    if not os.path.exists(basic_path):
+        sys.stderr.writelines('file not found: {}\nabort.\n'.format(basic_path))
         sys.exit(1)
 
-    actions = []
-
-    if args.average_frame_length:
-        actions.append(AverageFrameLength(args.average_frame_length))
-
-    if args.extract_mac_addresses:
-        actions.append(ExtractMACAddresses(args.extract_mac_addresses))
-
-    if args.dump:
-        actions.append(DumpFrame())
-        
-    if args.output:
-        actions.append(PcapOutput(args.output))
-
-    _process_file(args.input, actions)
+    actions = [InsertHashTable()] # only one action for this project
+    runtime = _process_file(basic_path, actions)
+    print(runtime)

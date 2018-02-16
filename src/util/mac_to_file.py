@@ -1,16 +1,6 @@
-from functools import wraps
-from time import time
+#!/usr/bin/env python2
+
 from random import randint, choice
-
-
-def timer(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        start = time()
-        func(*args, **kwargs)
-        end = time()
-        return end-start
-    return wrapper
 
 
 def random_mac():

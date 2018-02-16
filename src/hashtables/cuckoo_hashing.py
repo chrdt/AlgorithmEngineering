@@ -10,7 +10,6 @@ from src.util.hash_functions import universal_hash
 class CuckooHash(HashTable):
     """
     Pagh and Rodler's Cuckoo Hashing
-    Uses a stash for keys that cause irresolvable collisions
     """
     def __init__(self, size):
         self.size = size
@@ -33,8 +32,9 @@ class CuckooHash(HashTable):
         addr1 = self._hf1(key)
         addr2 = self._hf2(key)
 
-        if self._table1[addr1].key == key or self._table2[addr2].key == key:
-            raise self.InsertionException("Found equal key {}".format(key))
+        # - is done seperately
+        #if self.contains(key):
+        #    raise self.InsertionException("Found equal key {}".format(key))
 
         for _ in range(self._maxloop):
             hashaddr = self._hf1(key)
@@ -56,10 +56,12 @@ class CuckooHash(HashTable):
                 self._ckeck_for_rehash_and_resize()
                 return
 
+        print("\tRehashing due to maxLoop, key {} {}".format(hashaddr, key))
         self._rehash()
         self.insert(key, value)
 
     def _rehash(self):
+        # doesn't work with self.entries here
         ht1 = (entry for entry in self._table1 if entry)
         ht2 = (entry for entry in self._table2 if entry)
         self._reset()
@@ -70,23 +72,13 @@ class CuckooHash(HashTable):
     def _ckeck_for_rehash_and_resize(self):
         self._elementcount += 1
         if self._elementcount >= self.size:
-            print("\tRehashing and Resizing with size={} and elemencount={}".format(self.size, self._elementcount))
+            print("\tRehashing and Resizing with size={} and elementcount={}".format(self.size, self._elementcount))
             self.size *= 2
-            self.rehash()
-
-    def search(self, key):
-        addr1 = self._hf1(key)
-        if self._table1[addr1].key == key:
-            return self._table1[addr1].value
-
-        addr2 = self._hf2(key)
-        if self._table1[addr2].key == key:
-            return self._table1[addr2].value
-
-        return None
+            self._rehash()
 
     def contains(self, key):
-        return self._table1[self._hf1(key)].key == key or self._table2[self._hf2(key)].key == key
+        return (self._table1[self._hf1(key)] and self._table1[self._hf1(key)].key == key) \
+                or (self._table2[self._hf2(key)] and self._table2[self._hf2(key)].key == key)
 
     def pprint(self):
         print("------ TABLE 1:")
@@ -101,15 +93,18 @@ class CuckooHash(HashTable):
                 field = self._table2[index]
                 print("{:^2}: ({:^3}, {:^3})".format(index, field.key, field.value))
 
-    def tosequence(self):
+    def entries(self):
         ht1 = (entry for entry in self._table1 if entry)
         ht2 = (entry for entry in self._table2 if entry)
-        items = (str(entry.key) + " " + str(entry.value) for entry in chain(ht1, ht2))
-        return "\n".join(items)
+        for entry in chain(ht1, ht2):
+            yield entry
 
 
 if __name__ == '__main__':
     ht = CuckooHash(64)
-    for i in range(1000):
-        ht.insert(i, i)
-    x = ht.tosequence()
+
+    for i in range(1, 1000):
+        if not ht.contains(i):
+            ht.insert(i, i)
+
+    ht.pprint()
