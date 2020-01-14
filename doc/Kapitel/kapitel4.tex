@@ -1,0 +1,63 @@
+\chapter{Vorbetrachtung zur Implementierung der geforderten Aufgaben}\label{implement}
+Anforderungen an die zu implementierenden Aufgaben werden in diesem Kapitel genauer spezifiziert. Außerdem geht es um Abnahmekriterien, mit denen nachgewiesen werden kann, dass die Aufgaben korrekt gelöst wurden.
+
+\section{Anforderungen an die Aufgaben}\label{anforderungen}
+Bei der Softwareentwicklung ist es essentiell, die Anforderungen zu analysieren, die ein zu lösendes Problem mit sich bringt. Sind die Anforderungen nicht klar definiert, kann es beispielsweise zu Missverständnissen mit einem Kunden kommen. Bei der Analyse der Anforderungen für diese Arbeit ist es sinnvoll, den Ist-Zustand zu betrachten und Abnahmekriterien festzulegen. Die Abnahmekriterien müssen erfüllt werden, damit das Problem als gelöst gilt. 
+
+Eine klassische Anforderungsanalyse ist für diese Arbeit nicht sinnvoll, jedoch werden im Folgenden die Aufgaben zu Hash-Verfahren betrachtet, die bereits im autotool implementiert sind. Dabei handelt es sich um zwei Aufgabentypen zum  Chaining und Doppel-Hashing. Durch den Programmcode, der diese Aufgabentypen realisiert, wird eine Schnittstelle definiert, die auch für die zu implementierenden Aufgaben zum Doppel-Hashing mit Brents Algorithmus und für das Kuckucks-Hashing dienen soll. Aus diesem Grund wird in Kapitel~\ref{schnittstelle} vor der Implementierung zunächst diese Schnittstelle analysiert. 
+
+Die Konfigurationsparameter für Aufgaben zum Hashing sind bereits vorhanden. Demnach sieht eine mögliche Konfiguration folgendermaßen aus:
+\begin{lstlisting} [caption={Konfiguration für den Aufgabentyp Hash-Tabelle}]
+Config
+	{ size = 11
+	, generate_function = Pair  ( Random_Linear 11
+                                , Fixed \ x -> 1
+                                )
+	, handle_function = Hide_Numbers
+	, initial_inserts = 3
+	, visible_inserts = 2
+	, guessed_inserts = 5
+	, instance_candidates = 100
+	, solution_candidates = 100 
+	}
+\end{lstlisting}
+Anhand dieser Parameter wird eine Aufgabeninstanz generiert. Die Parameter und das Würfeln von Aufgaben sollen unberührt bleiben, vorausgesetzt es werden Aufgaben für das Kuckucks-Hashing generiert, die einen angemessenen Schwierigkeitsgrad haben.  
+
+Die Aufgaben selbst werden nach dem gleichen Prinzip verlaufen: Eine Hash-Tabelle der Länge \textit{size} wird initialisiert und nacheinander \(initial\_inserts+visible\_inserts+guessed\_inserts\) zufällig generierte Schlüssel darin eingefügt. Bei den Schlüsseln handelt es sich um natürliche Zahlen. Die Hash-Funktionen für das Einfügen werden zufällig nach den in \(generate\_function\) ausgewählten Funktionen generiert. Die Aufgabenstellung liefert dem Nutzer eine Hash-Tabelle \(h_{1}\) in der lediglich die ersten \(initial\_inserts\) Schlüssel eingefügt wurden und eine Hash-Tabelle \(h_{2}\) mit allen eingefügten Schlüsseln. Ziel der Aufgabe ist es, \(visible\_inserts+guessed\_inserts\) Einfüge-Operationen anzugeben, von denen bereits \(visible\_inserts\) sichtbar sind, die \(h_{1}\) in \(h_{2}\) überführen. Darüber hinaus müssen die passenden Hash-Funktionen angegeben werden. 
+\newpage
+Eine gewürfelte Aufgabeninstanz mit der vorgenommenen Konfiguration zeigt Listing~\ref{kbmehr}:
+\begin{lstlisting} [caption={Aufgabeninstanz zum Doppel-Hashing für die vorgenommene Konfiguration}, label={kbmehr}, language={}]
+This exercise uses double hashing.
+Replace each hole (_) in the configuration
+	Config
+		{ size = 5
+		, hash1 = \ x -> _ + _ * x
+		, hash2 = \ x -> _ 
+		}
+and in the sequence of operations
+	[ Insert 23
+	, Insert _
+	, Insert _
+	]
+with a numerical expression
+such that the sequence of operations transforms
+	Table (listToFM
+		[ ( 3, 15)])
+to
+	Table (listToFM
+		[ ( 1, 23)
+		, ( 2, 9)
+		, ( 3, 15)
+		, ( 4, 5)
+		])
+\end{lstlisting}
+Für diese Aufgabe sind für das gewählte Hash-Verfahren die Operationen Einfügen und Suchen nötig. Bei der Implementierung des Doppel-Hashings mit Brents Algorithmus und des Kuckucks-Hashings müssen also diese beiden Operationen umgesetzt werden. Auf das Löschen wird verzichtet, da es für diesen Aufgabentyp nicht benötigt wird. 
+
+Nachdem die Operationen implementiert wurden, wird überprüft, ob durch das Würfeln sinnvolle Aufgaben erstellt werden. Zudem muss sichergestellt werden, dass es zwischen den Implementierungen vom Doppel-Hashing und dem Doppel-Hashing mit Brents Algorithmus nicht zu dupliziertem Code kommt beziehungsweise dieser entfernt wird. 
+
+Ferner wird das Re-Hashing beim Einfügen nicht realisiert, da es nicht dem Sinn der Aufgaben entspricht.
+
+\section{Abnahmekriterien für die Implementierung}\label{abnahme}
+Um zu prüfen, ob die Anforderungen korrekt implementiert wurden, ist das Typsystem von Haskell hilfreich. Wurde der Code ohne Fehler kompiliert, sind keine Typfehler enthalten. Dieser Fakt garantiert jedoch nicht, dass die implementierten Funktionen das korrekte Verhalten aufweisen. Zu diesem Zweck werden für beide Varianten die Beispielaufgaben aus den Kapiteln~\ref{examplebrent} und~\ref{examplecuck} im autotool nachgestellt. Stimmen die Ergebnisse des autotools mit den schriftlich berechneten Ergebnissen überein, so gelten die Funktionen als korrekt implementiert. 
+
+Diese Probe war nicht die einzige, um die Korrektheit der Implementierung zu versichern. So gilt es beispielsweise beim Kuckucks-Hashing zu testen, ob Endlosschleifen erfolgreich abgefangen werden. In dieser Arbeit jedoch werden lediglich diese Beispielaufgaben als Tests durchgeführt, da die Implementierung selbst im Mittelpunkt steht.

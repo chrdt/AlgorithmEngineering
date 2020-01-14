@@ -1,0 +1,96 @@
+\chapter{Einführung in das E-Learning-System autotool}\label{ch3}
+In diesem Kapitel wird das E-Learning-System autotool vorgestellt. In dem Unterkapitel~\ref{autotoolEl} geht es um den Begriff E-Learning und die Funktionen des autotools. Danach wird in Unterkapitel~\ref{autotoolTe} näher beleuchtet, wie das autotool aus technischer Sicht aufgebaut ist und welche Technologien bei der Entwicklung verwendet werden.
+
+\section{Das autotool im Bereich E-Learning}\label{autotoolEl}
+\subsection{Der Begriff E-Learning}
+Unter \Gls{elear} versteht man „die didaktische Integration digitaler Medien in die Lehre sowie das Lernen mit diesen Medien“ \cite[S.~13]{ELbrosch}. Der Begriff selbst umfasst ein breites Spektrum an Systemen und reicht beispielsweise von der Unterstützung von Fachvorträgen durch Präsentationsprogramme bis hin zu Werkzeugen, die den Lehrenden komplett ersetzen sollen. Das Wachstum dieses Bereichs ist für Hochschulen interessant und stellt gleichzeitig eine Herausforderung dar, da es eine Vielzahl an Möglichkeiten zur Unterstützung der Lehre erzeugt, die es effizient zu integrieren gilt \cite[S.~13]{ELbrosch}. 
+
+Das \gls{autot} ist ein webbasiertes E-Learning-System, welches bereits seit dem Jahr 2003 entwickelt und von der HTWK Leipzig, der Universität Leipzig und mehreren deutschen Ausbildungsstätten zur Unterstützung von Vorlesungen in den Bereichen Informatik und Mathematik verwendet wird \cite[S.~1]{atnetzw}. In der Webplattform können Institutionen hinzugefügt werden, für die verschiedene Kurse erstellt werden können. Studenten und Professoren können sich nach der Authentifizierung mit dem autotool als Nutzer in verschiedene Kurse eintragen. 
+
+Ein Nutzer kann die Rollen Administrator, Direktor oder Tutor innehaben. Jede dieser Rollen berechtigt dazu, verschiedene Aktionen durchzuführen. So kann ein Administrator Institutionen im autotool hinzufügen, ein Direktor innerhalb seiner zugeteilten Institution Vorlesungen erstellen und diesen Tutoren zuordnen, die wiederrum eine Vorlesung leiten und darin Aufgaben erteilen können. 
+
+Studenten, die sich in einen Kurs eingetragen haben, der zu einer bestimmten Vorlesung gehört, können alle darin gestellten Aufgaben bearbeiten, die vom Typ Demo (zu Demonstrationszwecken), Mandatory (Pflicht) oder Optional (erhöhter Schwierigkeitsgrad) sein können \cite[S.~6]{ATauterz}. 
+
+Letztlich ist der Zweck des autotools, unterrichtsbegleitend Aufgaben zu stellen, die es bisher in den Bereichen der Mathematik, der theoretischen und der praktischen Informatik gibt. Soll durch einen Tutor eine Aufgabe in einem Kurs gestellt werden, so muss zunächst ein Aufgabentyp ausgewählt werden. Der Aufgabentyp bestimmt den Sachverhalt, der abgeprüft wird und kann beispielsweise \textit{Hamiltonkreise} sein. Je nach ausgewähltem Aufgabentyp ist das Ausfüllen einer zugehörigen Konfiguration mit verschiedenen Parametern nötig. Mit Hilfe der Belegung der Parameter in der Konfiguration wird für jeden Kursteilnehmer eine einzigartige Aufgabe des festgelegten Aufgabentyps generiert.
+
+Nachkommend ist zur Veranschaulichung eine Konfiguration für Aufgaben zu Hamiltonkreisen dargestellt:
+\begin{lstlisting} [caption={Konfiguration für Aufgabe zu Hamiltonkreisen aus Sicht des Tutors}]
+Config
+	{ nodes = 8
+	, edges = 11
+	}
+\end{lstlisting}
+Die Konfiguration besteht aus den zwei Parametern \textit{nodes} und \textit{edges} für die Anzahl der Knoten und Kanten, die der Graph einer Aufgabeninstanz haben soll. 
+\newpage
+Eine anhand der Konfiguration generierte Aufgabeninstanz dieses Aufgabentyps für einen Kursteilnehmer ist folgende:
+\begin{lstlisting} [caption={Erstellte Aufgabeninstanz für die vorgenommene Aufgabenkonfiguration zu Hamiltonkreisen aus Sicht eines Kursteilnehmers}]
+Gesucht ist ein Hamiltonkreis @/in/@
+	Graph
+		{ knoten = mkSet[ 1, 2, 3, 4, 5, 6, 7, 8]
+		, kanten = mkSet[ kante 1 3, kante 1 5, kante 1 6, kante 2 7, kante 2 8, kante 3 4
+						, kante 3 8, kante 4 6, kante 5 7, kante 6 7, kante 6 8
+						] 
+		}
+\end{lstlisting}
+Des Weiteren wird zur Veranschaulichung des Graphen durch das autotool Abbildung~\ref{at_hamilton} angezeigt:
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.35\textwidth]{Bilder/hamiltonkreis.png}
+	\caption{Abbildung des Hamiltonkreises für die generierte Aufgabeninstanz}
+	\label{at_hamilton}
+\end{figure}
+Wie in der Konfiguration vorgesehen, handelt es sich um einen Graphen, der aus 8 Knoten und 11 Kanten besteht.
+Durch die zufällige Generierung von Aufgabeninstanzen für jeden Kursteilnehmer wird das Teilen von Lösungen unter den Studenten verhindert, was zum eigenständigen Arbeiten anregen soll \cite[S.~1]{ATnetzw}. Eine mögliche Lösung für dieses Beispiel ist:
+\begin{lstlisting} [caption={Lösung für die Aufgabeninstanz}]
+[ 1, 3, 4, 6, 8, 2, 7, 5]
+\end{lstlisting}
+
+\subsection{Aufgabenbewertung des autotools}
+Übungsaufgaben sind in der Lehre zu den Bereichen Informatik und Mathematik für Studierende essentiell, um durch praktische Anwendung der Theorie das Verständnis zu fördern. Oft reicht es für einen optimalen Lerneffekt nicht aus, Lösungsversuche lediglich nach dem Zustand richtig oder falsch zu bewerten. In diesen Situationen kann es für den Studenten bei einer als falsch bewerteten Lösung schwer nachvollziehbar sein, an welcher Stelle ein Fehler gemacht wurde \cite[S.~2]{automatpvp}. 
+
+Um den Studenten bei der Bewertung von Aufgaben bei der Fehlersuche zu unterstützen, überprüft das autotool eingegebene Lösungen schrittweise und gibt dabei Zwischenergebnisse und durchgeführte Operationen für den Studenten aus. Auf diese Weise wird genau sichtbar, welche Folgen der eingesendete Lösungsversuch hatte \cite[S.~2]{ATnetzw}. 
+
+Ein Vorteil an diesem Verhalten ist, dass der Student ein Gespür für die angewandten Operationen entwickelt und dazu motiviert wird, verschiedene Varianten auszuprobieren. Des Weiteren können eventuelle Denkfehler frühzeitig beseitigt werden. 
+
+Der Tutor, der die Aufgaben in einem Kurs gestellt hat, kann in der Weboberfläche die Fortschritte der Kursteilnehmer überwachen und beispielsweise erfahren, wie viele Lösungsversuche für eine Aufgabe angewandt wurden. Dieser Übersicht können wertvolle Informationen über den Schwierigkeitsgrad einer Aufgabe oder eventuelle Unklarheiten bei den Kursteilnehmern entnommen werden.
+
+\subsection{Aufgaben für Hash-Verfahren für das autotool}
+Ziel dieser Arbeit ist es, für das autotool Aufgaben zu den Hash-Verfahren Doppel-Hashing mit Brents Algorithmus und Kuckucks-Hashing zu implementieren. Diese Aufgaben sollen zur Begleitung der Vorlesung \textit{Algorithmen und Datenstrukturen} dienen. 
+
+Für den konkreten Datentyp Hash-Tabelle gibt es im autotool bereits Aufgaben für die Hash-Verfahren \textit{Chaining} und \textit{Doppel-Hashing}. Der Schwierigkeitsgrad der Aufgaben zum \textit{Doppel-Hashing} hat sich nach \cite[S.~5]{ATerzeugads} im Sommersemester 2017 als hoch erwiesen. Der Kursteilnehmer musste bei zwei gegebenen Hash-Tabellen \(h_{1}\) und \(h_{2}\) durch Angabe von zwei Hash-Funktionen und einer Folge von Einfüge-Operationen \(h_{1}\) in \(h_{2}\) überführen. Durch das Sondieren beim Doppel-Hashing lässt sich bei Betrachtung der beiden Hash-Tabellen die Reihenfolge, in der die Schlüssel eingefügt wurden, kaum auf systematische Weise ermitteln. In diesem Fakt liegt der erhöhte Schwierigkeitsgrad dieses Aufgabentypen begründet. 
+
+Eine genauere Beschreibung zu den Anforderungen der Aufgabentypen, die implementiert werden, folgen in der Anforderungsanalyse in Kapitel~\ref{anforderungen}.
+
+\section{Technische Umsetzung des autotools}\label{autotoolTe}
+\subsection{Funktionale Programmierung und Haskell}
+Das autotool wird mit Hilfe der rein funktionalen Programmiersprache \gls{haskl} entwickelt \cite[ch.~1]{HasLangRep}. Die funktionale Programmierung ist ein Programmierparadigma in dem es darum geht, auf deklarative Weise mit Hilfe von Funktionen Programme zu schreiben. 
+
+Variablen in Haskell unterscheiden sich stark von denen, wie sie in der imperativen Programmierung verwendet werden. Wurde eine Variable deklariert, kann ihr Zustand danach nicht mehr verändert werden, sie ist also unveränderlich oder zu englisch \textit{immutable}. Jede Funktion muss unter Verwendung dieser Variablen arbeiten und löst somit keine dem Programmierer verborgenen Nebenwirkungen aus. Daraus resultieren klare Programme, die leichter lesbar als etwa imperative oder objektorientierte Programme sind \cite{HAfuncprog}. 
+
+Ferner ist es ein Ziel, größtenteils pure Funktionen zu verwenden, also Funktionen, die beim Aufruf mit den gleichen Parametern stets zum gleichen Ergebnis kommen \cite[ch.~1]{HArealw}. Zudem können bei Funktionen höherer Ordnung andere Funktionen als Parameter verwendet werden, was es unter anderem ermöglicht, Programmcode wiederzuverwenden.
+
+Haskell selbst hat seine Wurzeln in der Mathematik, genauer dem Lambda-Kalkül, welches als formale Sprache zur Untersuchung von Funktionen dient \cite[S.~111]{lambda}. Jeder Ausdruck und jede Funktion hat einen bestimmten Typen, der in den meisten Fällen vom Compiler durch Typinferenz bestimmt werden kann. Das Typsystem ist statisch und stark, was zur Folge hat, dass während der Laufzeit eines Programmes keine Typfehler auftreten können \cite[ch.~2]{HArealw}. Falls ein Typfehler im Programmcode vorhanden ist, wird dieser durch den Compiler erkannt und als Typfehler gemeldet \cite[ch.~1]{HArealw}.
+
+Ein Vorteil dieses Typsystems ist es, dass Bugs in Programmen frühzeitig erkannt werden können, was das Ziel des Sprachkomitees, die Sprache auch für die Entwicklung größerer System verwendbar zu machen, begünstigt \cite[Preface]{HasLangRep}. 
+
+Die benannten Eigenschaften von Haskell sind für die Entwicklung am autotool von Vorteil, da das Arbeiten mehrerer Personen daran durch die Wartbarkeit und die gute Lesbarkeit des Programmcodes unterstützt wird. Die Algorithmen, die sich hinter den meisten Operationen für Aufgaben verstecken, lassen sich oft ähnlich umsetzen, was in Kapitel~\ref{kuckimpl} angedeutet wird.
+
+Ein weiteres Hauptmerkmal des Typsystems von Haskell sind polymorphe Typen, die es ermöglichen, ein gewisses Verhalten auf alle anderen Typen zu quantifizieren. Der Ausdruck \([a]\) mit der Typvariablen \(a\), beschreibt demnach eine Familie von Listen, die mit Werten des gleichen Typs gefüllt sind, wie zum Beispiel Listen von Integern, Listen von Strings und Listen von Listen von Integern \cite[ch.~2]{ATgentle}. 
+
+Typklassen sind eine Einschränkung der Polymorphie. In der Deklaration einer Typklasse werden abhängig von Typvariablen die Signaturen bestimmter Funktionen festlegt, diese aber nicht zwangsläufig implementiert. Mit einer Belegung der Typvariablen kann eine Instanz der Typklasse erstellt werden, in der die vorgeschriebenen Funktionen ausprogrammiert werden müssen \cite[ch.~5]{ATgentle}. Demnach können mit Hilfe von Typklassen abstrakte Datentypen definiert werden. Ein Beispiel zur Anwendung einer Typklasse im autotool folgt in Kapitel~\ref{implement}. 
+
+Die Entwicklung mit Haskell wird durch weitere Eigenschaften dieser Programmiersprache begünstigt, deren Beschreibung an dieser Stelle den Umfang dieser Arbeit sprengen würden. Hinter Haskell steht eine lebendige Community, die zahlreiche Pakete und Werkzeuge zur Verfügung stellt, die das Arbeiten erleichtern sollen.
+
+\subsection{Erstellung eines Builds des autotools}
+In Haskell bezeichnet man eine Gruppierung von Deklarationen, die sich in der gleichen Datei befinden, als Modul. Ein Programm ist somit eine Ansammlung mehrerer Module \cite[ch.~11]{ATgentle}. Um die Verwaltbarkeit von Programmen zu erleichtern, lassen sich mehrere Module zu einem Paket zusammenfassen. Das autotool wird mit dem Compiler \textit{GHC (Glasgow Haskell Compiler)} \cite{ghc} übersetzt, welcher eine grundlegende Sammlung von Paketen standardmäßig installiert. Für die Entwicklung benötigt man jedoch zusätzlich externe Pakete, die über das zentrale Paket-Archiv \textit{Hackage} \cite{hackage} in Bibliotheken verfügbar sind.
+
+In jedem Paket wird bestimmt, ob es zum Funktionieren Inhalte eines anderen Paketes voraussetzt. Das autotool selbst besteht aus 20 Paketen, die wiederrum den Zugriff auf über 100 externe Pakete erfordern \cite{ATsoftweng}. 
+Um die Abhängigkeiten zwischen diesen Paketen zu erfüllen und das Projekt zu bauen, existiert das Werkzeug \textit{cabal} \cite{cabal}. Mit Hilfe von Konfigurationsdateien werden die Abhängigkeiten festgelegt, welche von \textit{cabal} zu einem Abhängigkeitsgraphen zwischen den Paketen verarbeitet werden. Somit wird sichergestellt, dass die Pakete mittels \textit{GHC} in der richtigen Reihenfolge kompiliert werden und dabei stets alle geforderten Abhängigkeiten erfüllt sind \cite{ATsoftweng}. 
+
+Zum Bauen des autotools wird das Werkzeug \textit{stack} \cite{stack} verwendet, welches die Konfigurationsdateien von \textit{cabal} und zusätzlich ein internes Archiv nutzt, um zuverlässigere, nachvollziehbarere Builds als \textit{cabal} zu erzeugen \cite{ATsoftweng}. Das Archiv von \textit{stack} gibt Auskunft über die Kompatibilität von Bibliotheken in Abhängigkeit von deren Version.
+
+\subsection{Grundlegende Architektur des autotools}
+Wie in der Softwareentwicklung üblich, lässt sich das autotool in Front-End und Back-End aufteilen. Das Front-End besteht aus einer mySQL-Datenbank, in der alle Institutionen, Nutzer, Kurse, Aufgaben und deren Abhängigkeiten verwaltet werden und einer Web-Oberfläche. Als Letzteres lassen sich verschiedene Frontends verwenden, sofern diese an die Schnittstelle zum Back-End angepasst wurden \cite{ATnetzw}. 
+
+Interessanter ist für diese Arbeit das Back-End, welches aus einem zustandslosen XML-RPC-Server besteht, in dem die gesamte Semantik definiert wird \cite{ATsembew}. Der XML-RPC-Server ermöglicht den entfernten Aufruf von Funktion (Remote Procedure Call) über HTTP. Die Funktionsparameter werden mit Hilfe von XML codiert \cite{ATxmlrpc}. Die Semantik der zu implementierenden Aufgaben wird im Back-End definiert, damit dafür im Front-End Aufgaben erstellt werden können. 
+

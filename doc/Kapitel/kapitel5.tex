@@ -1,0 +1,301 @@
+\chapter{Implementierung der geforderten Aufgaben}\label{ch5}
+Ziel dieses Kapitel ist es, Ausschnitte des Programmcodes zur Implementierung vorzustellen. Die vorhandene Schnittstelle wird näher betrachtet und der dargestellte Programmcode erklärt.
+
+\section{Schnittstelle für Aufgaben zu Hash-Verfahren}\label{schnittstelle}
+Um neue Aufgabentypen zu Hash-Verfahren zum autotool hinzuzufügen, müssen die Operationen Einfügen und Suchen in Form von Instanzdeklarationen der Typklasse \textit{Hash} ausprogrammiert werden. Die Operation Löschen wird zwar auch von dieser Typklasse definiert, muss jedoch nicht implementiert werden, da sie für keine der gewünschten Aufgaben erforderlich ist. 
+
+Die Typklasse \textit{Hash} gibt Funktionen und deren Signatur vor. Im Folgenden ist die Deklaration der Typklasse reduziert auf die Funktionen Einfügen, Entfernen und Suchen oder hier insert, delete und contains dargestellt:
+\begin{lstlisting} [caption={Typklasse \textit{Hash} mit den Signaturen der definierten Funktionen in der Datei Hash.Class}]
+type Key = Integer
+class (Eq h, ToDoc h) => Hash h where
+   contains :: Config h -> Key -> h -> Reporter Bool
+   insert :: Config h -> Key -> h -> Reporter h
+   delete :: Config h -> Key -> h -> Reporter h
+\end{lstlisting}
+Aus den Signaturen der Funktionen lassen sich die Typen der Argumente und des Wertes jeder Funktion ablesen. Die Typklasse ist außerdem von dem Typparameter \textit{h} abhängig, der als Platzhalter für den Typen der Datenstruktur dient, welche die Hash-Tabellen realisiert. Die drei Funktionen fordern ein Argument vom polymorphen Datentyp \textit{Config h}, in dem die Größe der Hash-Tabelle/n und die Hash-Funktionen in Abhängigkeit vom Typparameter \textit{h} gespeichert werden. Das zweite Argument ist vom Typ \textit{Key}, welcher bereits als Integer definiert ist und den Typ der Schlüssel darstellt. Das dritte Argument dient als Platzhalter für die Hash-Tabelle/n und ist vom Typen \textit{h}. 
+
+Der polymorphe Datentyp \textit{Reporter a} wird verwendet, um das Ergebnis einer Funktion vom Typen \textit{a} zu speichern und beispielsweise im Front-End als Ausgabe an den Nutzer anzuzeigen. Mit der \textit{reject}-Funktion eines Objekts vom Typ \textit{Reporter} lässt sich außerdem eine fehlgeschlagene Operation realisieren. In diesem Fall gibt es kein Ergebnis und ein Kommentar wird für die Nutzerausgabe mitgeliefert. Dieser Datentyp ermöglicht es ferner, Kommentare unabhängig vom Ergebnis auszugeben. 
+
+Durch die Abhängigkeit des polymorphen Datentyps \textit{Reporter a} von einer Typvariablen lässt sich dieser beim Hashing für alle drei Funktionen verwenden. Bei den Funktionen \textit{insert} und \textit{delete} werden neue Hash-Tabellen ausgegeben. Also ist der angegebene Typ \textit{Reporter h}. Die Funktion \textit{contains} liefert hingegen einen Wahrheitswert, was den Typen \textit{Reporter Bool} begründet. 
+
+Demgemäß werden die Instanzdeklarationen der Typklasse \textit{Hash} für die zu implementierenden Aufgabentypen vorgenommen und darin die Funktionen \textit{contains} und \textit{insert} so implementiert, wie es die jeweiligen Varianten vorsehen.
+
+\section{Implementierung des Doppel-Hashing mit Brents Algorithmus}
+Beim Doppel-Hashing mit Brents Algorithmus wird, wie auch beim normalen Doppel-Hashing, eine Hash-Tabelle verwendet. Aus diesem Grund lässt sich auch für diese Variante bei der Instanzdeklaration der Typparameter \textit{h} durch den Typen \textit{Table} ersetzen. 
+\newpage
+Der Typ \textit{Table} wird in Listing~\ref{tableu} definiert:
+\begin{lstlisting} [caption={Definition des Typen \textit{Table} in der Datei Hash.Double}, label={tableu}]
+import qualified Data.Map as M
+
+data Table = Table ( M.Map Integer Integer ) 
+  deriving (Typeable, Generic, Eq)
+\end{lstlisting}
+Hinter dem Typen steckt folglich der Datentyp \textit{Map k a} der Standardbibliothek \textit{Data}, der ein assoziatives Datenfeld mit Schlüsseln vom Typ \textit{k} und Werten vom Typ \textit{a} darstellt \cite{HasMap}. Beim Typ \textit{Table} werden beide Typparameter durch \textit{Integer} ersetzt, da sowohl die Schlüssel, als auch die Indizes der Hash-Tabelle natürliche Zahlen sind.
+
+Demzufolge  geschieht die Instanzdeklaration der aus der Datei \textit{Hash.Class} importierten Typklasse \textit{Hash} mit den Operationen \textit{contains} und \textit{insert} wie folgt:
+\begin{lstlisting} [caption={Grundstein der Instanzdeklaration der Typklasse \textit{Hash} in der Datei Hash.Double}]
+import qualified Hash.Class as C
+
+instance C.Hash Table where
+  ...
+  contains conf x (Table m) = ...
+  insert conf x (Table m) = ...
+\end{lstlisting}
+Für die \textit{contains}-Funktion lässt sich die Implementierung des normalen Doppel-Hashing übernehmen, da die Algorithmen für beide Varianten, wie in Kapitel~\ref{brent} beschrieben, äquivalent sind. 
+
+Um die \textit{insert}-Funktion zu implementieren, benötigt man eine Funktion, die für einen Schlüssel \textit{x} dessen Hash-Werte aus den beiden Hash-Funktionen berechnet sowie die Rechnung protokolliert. 
+\newpage
+Für diesen Zweck existiert die Funktion \textit{hashes}. 
+\begin{lstlisting} [caption={Implementierung der \textit{hashes}-Funktion in der Datei Hash.Double}]
+hashes tag conf x = do
+   let h1 = mod (eval (hash1 conf) x) (size conf)
+       h2 = mod (eval (hash2 conf) x) (size conf)
+   inform $ vcat [ tag, ... ]
+   return (h1, h2)
+\end{lstlisting}
+Neben dem Schlüssel \textit{x} besitzt die Funktion ein Argument \textit{conf}, durch welches man eine Konfiguration übergeben kann, in der die Hash-Funktionen gespeichert werden und ein Argument \textit{tag}, mit dem man einen String übergeben kann, der durch einen Aufruf von \textit{inform} an den Nutzer ausgegeben wird. 
+\newpage
+Unter Verwendung von \textit{hashes} wurde die \textit{insert}-Funktion folgendermaßen umgesetzt:
+\begin{lstlisting} [caption={Implementierung der \textit{insert}-Funktion in der Datei Hash.Double}, label={insertbrent}]
+import qualified Data.Map as M
+
+insert conf x (Table m) = do
+  (h1, h2) <- hashes "insert(x,S)" conf x
+  let go :: S.Set Integer -> Integer -> Reporter Table
+      go done p = do
+        when (S.member p done) $ reject "..."
+        case M.lookup p m of
+          Nothing -> do
+             return $ Table $ M.insert p x m
+          Just y -> do
+             if x == y
+               then return $ Table m
+               else do
+                 (h1y, h2y) <- hashes "insert(y,S)" "y" conf y
+                 let h1x_new = mod (p + h2) (size conf)
+                     h1y_new = mod (p + h2y) (size conf)
+                 case M.lookup h1x_new m of
+                   Nothing -> do
+                      return $ Table $ M.insert h1x_new x m
+                   Just _ -> do
+                      case M.lookup h1y_new m of
+                        Nothing -> do
+                           return $ Table $ M.insert p x (M.insert h1y_new y m)
+                        Just _ -> do
+                           go (S.insert p done) h1x_new
+  go S.empty h1
+\end{lstlisting}
+Das Einfügen geschieht mit Hilfe einer Funktion \textit{go}, die unter Angabe neuer Hash-Adressen bis zum kollisionsfreien Einfügen rekursiv aufgerufen wird. Das Argument \textit{done} ist eine Menge, in der sich alle bereits abgeprüften Hash-Adressen befinden. Das zweite Argument \textit{p} ist die Hash-Adresse, in die eingefügt werden soll. In Zeile 7 wird abgeprüft, ob sich \textit{p} in \textit{done} befindet, also diese Hash-Adresse bereits betrachtet wurde und falls dies der Fall ist, wird das Einfügen durch einen Aufruf von \textit{reject} abgebrochen. 
+
+In Zeile 8 beginnt ein Pattern Matching über die Hash-Adresse \textit{p} der Hash-Tabelle \textit{m}. Ist die Hash-Adresse leer (Zeile 9), so wird der Schlüssel \textit{x} an dieser Hash-Adresse eingefügt und die Hash-Tabelle als Wert der Funktion ausgegeben (Zeile 10).
+
+Andernfalls werden die nächsten Hash-Adressen in den Sondierungsfolgen der Schlüssel \textit{x} und \textit{y} berechnet (Zeilen 16-17). Dabei ist \textit{y} der Schlüssel, der die Hash-Adresse \textit{p} besetzt. Ist die nächste Hash-Adresse von \textit{x} frei (Zeile 19), so wird \textit{x} dort eingefügt und die resultierende Hash-Tabelle zurückgegeben (Zeile 20). Tritt dieser Fall nicht ein, wird ein Pattern Matching auf die nächste Hash-Adresse von \textit{y} durchgeführt. Falls die Hash-Adresse frei ist, wird \textit{y} dort und \textit{x} an der Hash-Adresse \textit{p} eingefügt (Zeile 24) und die Hash-Tabelle ausgegeben. Sollte die Hash-Adresse belegt sein, wird \textit{done} um die Hash-Adresse \text{p} erweitert und zusammen mit der nächsten Hash-Adresse der Sondierungsfolge von \textit{x} als Argument an einen rekursiven Aufruf von \textit{go} weitergegeben. 
+
+Auf diese Weise wird \textit{go} solange rekursiv aufgerufen, bis erfolgreich eingefügt wurde oder eine Hash-Adresse ein zweites Mal auftritt, was zum erfolglosen Abbruch der Operation führt.
+
+In der Implementierung wird mehrmals der \textit{\$}-Operator verwendet, welcher Klammern ersetzt. An einem Beispiel erklärt, ist der Ausdruck \textit{f (g x)} äquivalent zu dem Ausdruck \textit{f \$ g x}. 
+
+Vergleicht man letztendlich die Implementierung der \textit{insert}-Funktion des Doppel-Hashings mit der des Doppel-Hashings mit Brents Algorithmus, so fällt auf, dass sich beide Funktionen lediglich im in Zeile 14 beginnenden Entscheidungszweig unterscheiden. Die Zeilen 14-26 des Listings~\ref{insertbrent} werden beim Doppel-Hashing durch folgenden Programmcode ersetzt:
+\begin{lstlisting} [caption={Unterschied bei der Implementierung des Doppel-Hashing zur Variante ohne Brents Algorithmus}]
+else go (S.insert p done) $ mod (p + h2) (size conf)
+\end{lstlisting}
+Die restlichen Inhalte der beiden Dateien sind fast identisch, was bedeutet, dass es sich um duplizierten Code handelt. Die Abwesenheit von dupliziertem Code ist in der Softwareentwicklung ein Zeichen von sauberem Code \cite[S.~37]{cleancode}, weswegen im anschließenden Unterkapitel eine Lösung vorgestellt wird, den dupliziertem Code zu beseitigen.
+
+\section{Refactoring zum Entfernen des duplizierten Codes}
+Unter einem \Gls{refac} versteht man die Verbesserung der Struktur von Programmcode, ohne dass sich dessen Verhalten nach außen verändert \cite[Preface]{refactoring}. Ziel dieses Kapitels ist es, ein Refactoring durchzuführen, welches die Implementierungen des Doppel-Hashings und des Doppel-Hashings mit Brents Algorithmus in einem Modul vereinigt und somit den duplizierten Code entfernt. 
+
+Typklassen bieten sich an, um Funktionen abhängig von Typparametern verschieden zu implementieren, was für diese Situation eine hilfreiche Eigenschaft ist \cite[ch.~6]{HArealw}. Zunächst benötigt man jedoch einen Weg, um bei der Erstellung einer Aufgabe zwischen den beiden Varianten unterscheiden zu können. Da bei beiden Varianten der Typ \textit{Table} verwendet wird, wird dieser in einen Phantom-Typen umgewandelt, um die Variante als Phantom-Typparameter speichern zu können. Dies geschieht auf folgende Weise:
+\begin{lstlisting} [caption={Deklaration des Typs \textit{Table} als Phantom-Typ in der Datei Hash.Double}]
+data Table v = Table ( M.Map Integer Integer )
+  deriving (Typeable, Generic, Eq)
+\end{lstlisting}
+Ein Phantom-Typ ist also ein polymorpher Typ, dessen Typvariablen (hier \textit{v}) nicht alle auf der rechten Seite des Zuweisungs-Operators \textit{=} in der \textit{data}-Deklaration vorkommen \cite{phantom}. 
+\newpage
+Dadurch kann man beispielsweise Typen, welche die Variante signalisieren, wie folgt an ein Objekt vom Typ \textit{Table v} binden:
+\begin{lstlisting} [caption={Deklaration zweier Objekte vom Typ \textit{Table v} in der Datei Hash.Double}]
+data Standard
+data Brent
+
+tableS :: Table Standard
+tableS = Table $ M.fromList [ (8, 42) ]
+
+tableB :: Table Brent
+tableB = Table $ M.fromList [ (8, 42) ]
+\end{lstlisting}
+In den Zeilen 1-2 werden die Datentypen \textit{Standard} und \textit{Brent} ohne Konstruktoren deklariert. Die Datentypen können dadurch als Phantom-Typargumente für \textit{Table v} verwendet werden. Als Typvariable könnte anstatt \textit{Standard} und \textit{Brent} jeder beliebige andere Typ verwendet werden. Die beiden Typen sollen jedoch dem Zweck dienen, zwischen den zwei Varianten des Hashing unterscheiden zu können. In den Zeilen 3-4 wird ein Objekt vom Typ \textit{Table Standard} und in den Zeilen 5-6 ein Objekt vom Typ \textit{Table Brent} angelegt.
+
+Die Typklasse \textit{Variant} wird als Schnittstelle der Datentypen \textit{Standard} und \textit{Brent} definiert. Hiermit lassen sich Signaturen von Funktionen vorgeben, die als Instanzen der Typklasse implementiert werden müssen. An dieser Stelle reicht die Deklaration einer Funktion \textit{vm} für die Typklasse aus. Das Resultat ist diese Typklasse:
+\begin{lstlisting} [caption={Deklaration der Typklasse \textit{Variant} in der Datei Hash.Double}]
+class Variant v where
+  vm :: Proxy v -> ...
+\end{lstlisting}
+Innerhalb der \textit{insert}-Funktion lässt sich anhand des Objektes vom Typ \textit{Table v} das Phantom-Typargument \textit{v} ableiten, welches in diesem Fall entweder \textit{Standard} oder \textit{Brent} ist. Ruft man unter Angabe von \textit{v} die Funktion \textit{vm} der Typklasse \textit{Variant} auf, so wird die Implementierung der entsprechenden Instanz verwendet. Beim Aufruf von \textit{vm} benötigt man den Datentypen \textit{Proxy}, um \textit{v} als Typparameter sichtbar machen zu können. 
+\newpage
+Demnach ergibt sich folgende, modifizierte \textit{insert}-Funktion:
+\begin{lstlisting} [caption={\textit{insert}-Funktion mit Funktionsaufruf von \textit{vm} in der Datei Hash.Double}]
+instance Variant v => C.Hash (Table v) where
+  ...
+  insert conf x (Table m) = do
+    (h1, h2) <- hashes "insert(x,S)" "x" conf x
+    let go :: S.Set Integer -> Integer -> Reporter (Table v)
+        go done p = do
+          when (S.member p done) $ reject "..."
+          case M.lookup p m of
+            Nothing -> do
+               return $ Table $ M.insert p x m
+            Just y -> do
+               if x == y
+                 then return $ Table m
+                 else vm (Proxy :: Proxy v) ...
+    go S.empty h1
+  ...  
+\end{lstlisting}
+Da sich die \textit{insert}-Funktionen der beiden Varianten für Doppel-Hashing mit und ohne Brents Algorithmus lediglich im Entscheidungszweig unterscheiden, der in Zeile 14 beginnt, werden diese Unterschiede in den Instanzdeklarationen der Datentypen \textit{Standard} und \textit{Brent} für die Typklasse \textit{Variant} in der Funktion \textit{vm} wie folgt implementiert: 
+\begin{lstlisting} [caption={Instanzdeklarationen der Typklasse \textit{Variant} für die Datentypen \textit{Standard} und \textit{Brent} in der Datei Hash.Double}]
+instance Variant Standard where
+  vm _ go conf x m done p h2 y = go (S.insert p done) $ mod (p + h2) (size conf)
+
+instance Variant Brent where
+  vm _ ... = ...
+\end{lstlisting}
+Die Instanzdeklaration des Datentypen \textit{Brent} wurde aus Platzgründen gekürzt, da sie den Zeilen 14-26 aus Listing~\ref{insertbrent} entspricht.
+
+Schließlich wurde jeglicher duplizierte Code entfernt. Nun können die zwei Aufgabentypen unterschieden werden, in dem man in den Funktionen, die für die Generierung von Aufgaben zuständig sind, Objekte vom Typ \textit{Table v} mit dem entsprechenden Phantom-Typparameter übergibt. Die Entscheidung, die vorher zur Laufzeit geschehen ist, wird mit dieser Modifikation bereits zur Kompilierungszeit vorgenommen. Ferner ist es nun möglich, weitere Varianten des Doppel-Hashing hinzuzufügen, indem für die entsprechende Variante ein neuer Datentyp mit einer Instanzdeklaration angelegt wird, in der die geforderten Funktionen entsprechend implementiert werden. 
+
+\section{Implementierung des Kuckucks-Hashing}\label{kuckimpl}
+Eine Besonderheit beim Kuckucks-Hashing ist die Verwendung von zwei Hash-Tabellen zum Speichern von Schlüsseln. Daher wird bei dieser Variante der Typparameter \textit{h} der Typklasse \textit{Hash} durch den Typ \textit{(Table, Table)}, also ein Tupel aus zwei Objekten des Datentyps \textit{Table} ersetzt. 
+
+Bei der Implementierung der \textit{insert}-Funktion ist es hilfreich, erneut den Algorithmus aus Kapitel~\ref{kuckuck} zu betrachten:
+\begin{lstlisting} [caption={Algorithmus zum Einfügen mit dem Kuckucks-Hashing}]
+procedure insert(x)
+	if lookup(x) then return
+	loop MaxLoop times
+		x @/\(\leftrightarrow\)/@ @/\(T_{1}[h_{1}(x)]\)/@
+		if x = @/\(\bot\)/@ then return
+		x @/\(\leftrightarrow\)/@ @/\(T_{2}[h_{2}(x)]\)/@
+		if x = @/\(\bot\)/@ then return
+	end loop
+	rehash(); insert(x)
+end
+\end{lstlisting}
+Das Einfügen soll nach diesem Algorithmus umgesetzt werden. Als Erstes wird die Operation \(\leftrightarrow\) betrachtet: Durch diese wird der Tausch zweier Variablen umgesetzt. Genauer auf diesen Fall spezifiziert ist bei einem Tausch \(x\leftrightarrow{}T_{1}[h_{1}(x)]\) \(x\) der aktuelle Schlüssel, der eingefügt werden soll. Dieser wird an der Hash-Adresse \(h_{1}(x)\) in \(T_{1}\) eingefügt. Danach wird die Variable \(x\) von dem Wert überschrieben, der zuvor an der gleichen Hash-Adresse in \(T_{1}\) war. 
+
+Dieses Verhalten wird durch eine Funktion mit dem Namen \(swap\) derart nachgestellt:
+\begin{lstlisting} [caption={Signatur der Funktion \textit{swap} und deren Implementierung in der Datei Hash.Cuckoo}]
+import qualified Hash.Class as C
+
+instance C.Hash Table where
+  insert conf x (Table m, Table n) = do
+    let swap :: Integer -> Integer -> M.Map Integer Integer -> (Maybe Integer, M.Map Integer Integer)
+        swap key pos ht = ((M.lookup pos ht), (M.insert pos key ht))
+\end{lstlisting}
+\newpage
+\begin{lstlisting} [caption={Signatur der Funktion \textit{swap} und deren Implementierung in der Datei Hash.Cuckoo}]
+let swap :: Integer -> Integer -> M.Map Integer Integer -> (Maybe Integer, M.Map Integer Integer)
+    swap key pos ht = ((M.lookup pos ht), (M.insert pos key ht))
+\end{lstlisting}
+Die Argumente \(key\) und \(pos\) sind beide vom Typ Integer und beschreiben den Schlüssel \(x\) und dessen Hash-Adresse \(h_{1}(x)\) oder \(h_{2}(x)\). Das dritte Argument ist die Hash-Tabelle, die durch den nativen Datentyp \textit{Map} mit Schlüsseln des Typs Integer und Werten des Typs Integer dargestellt wird. Da Variablen in Haskell unveränderbar sind, lässt sich der Tausch zweier Variablen nicht exakt realisieren. Stattdessen wird ein Tupel ausgegeben, welches ein Objekt vom Datentyp \textit{Maybe Integer} und die Tabelle mit dem neu eingefügten Schlüssel \textit{key} enthält. Das Objekt vom Datentyp \textit{Maybe Integer} ist entweder \textit{Just x'}, wobei \textit{x'} der beim Einfügen verdrängte Schlüssel ist, oder \textit{Nothing}, was in dieser Situation äquivalent zu \(\bot\) ist. 
+
+Der erste Wert des Tupels wird mit Hilfe der \textit{lookup}-Funktion bestimmt, welche unter Angabe einer Adresse und einer Map die gewünschte Ausgabe liefert. Durch Verwendung der \textit{insert}-Funktion wird ein Schlüssel an eine bestimmte Adresse in einer Map eingefügt und danach die neue Map als zweiter Wert des Tupels zurückgegeben. 
+
+Um die Richtigkeit der Funktion zu überprüfen, gibt es zwei relevante Testfälle. 
+\newpage
+Zunächst folgender Aufruf:
+\begin{lstlisting} [caption={Erster Testfall für die Funktion \textit{swap}}]
+swap 7 0 (M.fromList[(0,4)])
+>> (Just 4, fromList [(0,7)])
+\end{lstlisting}
+Der Schlüssel 7 wird an Adresse 0 eingefügt, an welcher der Schlüssel 4 positioniert ist. Demnach gibt die Funktion korrekterweise ein Tupel mit dem verdrängten Schlüssel 4 und der Map mit dem eingefügten Schlüssel 7 aus. Beim zweiten Testfall wird die Funktion mit der gleichen Map aufgerufen. Jedoch wird für diesen Aufruf der Schlüssel 7 an Adresse 1 aufgerufen:
+\begin{lstlisting} [caption={Zweiter Testfall für die Funktion \textit{swap}}]
+swap 7 1 (M.fromList[(0,4)])
+>> (Nothing, fromList [(0,4),(1,7)])
+\end{lstlisting}
+Die Adresse 1 ist in der angegebenen Map nicht belegt, also gibt die Funktion ein Tupel mit dem Wert \textit{Nothing} und der Map mit dem Schlüssel 7 an Adresse 1 eingefügt aus. 
+
+Nun, da beide Testfälle für den \(\leftrightarrow\)-Operator erfüllt sind, gilt es, die Schleife des Algorithmus nachzustellen. Schleifen lassen sich in Haskell durch Funktionen umsetzten, die sich selbst rekursiv aufrufen, bis eine Abbruchbedingung erfüllt ist. 
+\newpage
+Zu diesem Zweck wird eine Funktion namens \(loop\) verwendet:
+\begin{lstlisting} [caption={Signatur der Funktion \textit{loop} und deren Implementierung in der Datei Hash.Cuckoo}]
+let loop :: Integer -> (M.Map Integer Integer, M.Map Integer Integer) -> Reporter (Table, Table)
+    loop x (t1, t2) k = do
+      when (k<=0) $ reject "..."
+      (h1, _) <- hashes "insert(x,t1)" conf v
+      case swap x h1 t1 of
+        (Nothing, t1') -> do
+           return (Table $ t1', Table $ t2)
+        (Just y, t1') -> do
+           (_, h2) <- hashes "insert(x,t2)" conf y
+           case swap y h2 t2 of
+             (Nothing, t2') -> do
+                return (Table $ t1', Table $ t2')
+             (Just z, t2') -> do
+                loop z (t1', t2') (k-2)
+\end{lstlisting}
+Die Funktion ist definiert durch die Argumente \textit{x} für den einzufügenden Schlüssel, ein Tupel \textit{(t1, t2)} für die beiden Hash-Tabellen und einem Wert \textit{k} für die übrigen Schleifendurchläufe. 
+\begin{lstlisting} [caption={Signatur der Funktion \textit{loop} und deren Implementierung in der Datei Hash.Cuckoo}]
+let loop x (t1, t2) k = do
+  when (k<=0) $ reject "..."
+  loop x (t1, t2) (k-1)
+\end{lstlisting}
+\newpage
+\begin{lstlisting} [caption={Signatur der Funktion \textit{loop} und deren Implementierung in der Datei Hash.Cuckoo}]
+let loop x (t1, t2) k = do
+  when (k<=0) $ reject "..."
+  (h1, _) <- hashes "insert(x,t1)" conf x
+  case swap x h1 t1 of
+    (Nothing, t1') -> ..
+    (Just y, t1') -> ..
+    
+  loop x (t1, t2) (k-1)
+\end{lstlisting}
+\begin{lstlisting} [caption={Signatur der Funktion \textit{loop} und deren Implementierung in der Datei Hash.Cuckoo}]
+let loop x (t1, t2) k = do
+  when (k<=0) $ reject "..."
+  (h1, _) <- hashes "insert(x,t1)" conf x
+  case swap x h1 t1 of
+    (Nothing, t1') -> do
+      return (Table $ t1', Table $ t2)
+    (Just y, t1') -> ..
+
+  loop x (t1, t2) (k-1)
+\end{lstlisting}
+\begin{lstlisting} [caption={Signatur der Funktion \textit{loop} und deren Implementierung in der Datei Hash.Cuckoo}]
+let loop x (t1, t2) k = do
+  when (k<=0) $ reject "..."
+  (h1, _) <- hashes "insert(x,t1)" conf x
+  case swap x h1 t1 of
+    (Nothing, t1') -> do
+      return (Table $ t1', Table $ t2)
+    (Just y, t1') -> do
+      (_, h2) <- hashes "insert(x,t2)" conf y
+      case swap y h2 t2 of
+        (Nothing, t2') -> do
+          return (Table $ t1', Table $ t2')
+        (Just z, t2') -> do
+          loop z (t1', t2') (k-1)
+\end{lstlisting}
+Zunächst wird die Hash-Adresse in der ersten Hash-Tabelle \textit{t1} für \textit{x} berechnet und in der Variablen \textit{h1} gespeichert (Zeile 4). Danach wird die Funktion \(swap\) mit den entsprechenden Parametern aufgerufen, auf deren Ausgabe ein Pattern-Matching durchgeführt wird (Zeilen 5-8). 
+
+Mit diesem Pattern-Matching wird getestet, ob der Schlüssel \textit{x} kollisionsfrei eingefügt wurde. Ist dies der Fall (Zeilen 6-7), so wird die Schleife mit Ausgabe des Tupels \((t1', t2)\) in Zeile 7 beendet, wobei \textit{t1'} die Tabelle \textit{t1} nach Einfügen eines Schlüssel durch die \textit{swap}-Funktion darstellt. Die gleiche Beziehung gilt für die Variablen \textit{t2} und \textit{t2'}. 
+
+Wurde \textit{x} nicht kollisionsfrei eingefügt (Zeile 8), wird erneut \textit{swap} mit dem abgeschobenen Schlüssel \textit{y}, dessen Hash-Adresse \textit{h2} und der Hash-Tabelle \textit{t2} aufgerufen. Wie bei Schlüssel \textit{x} wird in Zeile 10 abgeprüft, ob \textit{y} ohne Kollisionen eingefügt wurde. Falls \textit{y} in ein leeres Feld eingefügt (Zeile 11), so wird die Schleife unter Ausgabe des Tupels \((t1', t2')\) beendet. Andernfalls (Zeile 13) wird \textit{loop} mit dem von \textit{y} verdrängten Schlüssel \textit{z} und dem Tupel \((t1', t2')\) in Zeile 14 erneut aufgerufen. 
+
+Die Schleife wird durch eine maximale Anzahl an Durchläufen begrenzt, die beim ersten Funktionsaufruf angegeben wird. Mit jedem rekursiven Aufruf der \textit{loop}-Funktion wird dieser Wert um zwei verringert (Zeile 14). Ist der Wert zu Beginn des Funktionsaufrufes kleiner gleich 0, so wird die Schleife abgebrochen (Zeile 7). Nach \cite[S.~5]{ADScuckoo} wird die maximale Anzahl an Durchläufen auf die Größe der Hash-Tabelle ins Quadrat gesetzt. Letztendlich wird die \textit{insert}-Funktion durch den Aufruf der \textit{loop}-Funktion folgendermaßen durchgeführt:
+\begin{lstlisting} [caption={Aufruf der Funktion \textit{loop} in der Datei Hash.Cuckoo}]
+insert conf x (Table m, Table n) = do
+  ...
+  let maxLoop = (size conf)^2
+  loop x (m, n) maxLoop
+\end{lstlisting}
+\newpage
+\begin{lstlisting} [caption={Aufruf der Funktion \textit{loop} in der Datei Hash.Cuckoo}]
+import qualified Hash.Class as C
+
+instance C.Hash Table where
+  ...
+  contains conf x (Table m) = ...
+  insert conf x (Table m) = do
+    ...
+    let maxLoop = (size conf)^2
+    loop x (m, n) maxLoop
+\end{lstlisting}

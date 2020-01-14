@@ -1,0 +1,74 @@
+%% Bindekorrektur abhängig von Layout %%
+%\KOMAoptions{BCOR= 5cm}
+
+%% Anzahl der Divisions zur Berechnung des Satzspiegels %%
+% Nur verwenden wenn keine automatische Satzspiegelberechnung möglich
+% Schriftgröße/DIV-Defaults: 10pt/8 11pt/10 12pt/12
+%\KOMAoptions{DIV= 12} 
+
+%% Seitenlayout %%
+% Einseitig-Zweiseitig
+% twoside=true,false,semi
+% semi bewirkt alternierendes BCOR bei einseitigem Layout
+\KOMAoptions{twoside=false} 
+
+% Einspaltig-Zweispaltig
+% twocolumn=true,false
+%\KOMAoptions{twocolumn=true} 
+
+% Absatz-Formatierung (default: einrücken)
+%\KOMAoptions{parskip=half}  % halbe Zeile Leerraum nach Absatz
+
+% Kopf- und Fußzeile und Randnotizen bei Satzspiegelberenung zum Rand zählen ( dann mehr/weniger Rand ?? ) 
+% headinclude,footinclude,mpinclude=true,false
+%\KOMAoptions{headinclude=true} 
+%\KOMAoptions{footinclude=true} 
+%\KOMAoptions{mpinclude=true}
+
+% Papierformat
+%\KOMAoptions{paper=Format} % a4
+%\KOMAoptions{paper=Ausrichtung} % portrait,landscape,seascape
+
+%% Inhalt Kopf- und Fußzeile
+% ENTWEDER: Default Seitenstile
+%\pagestyle{headings} % Globaler Seitenstil
+%\thispagestyle{headings} % Lokaler Seitenstil, bei Bedarf in Dokument verwenden
+
+% headings: Kapitel- bzw. Sectiontitel in Kopfzeile, Seitenzahl im Fuß
+% plain: nur Seitenzahl im Fuß
+
+% ODER: Zu KOMA-Script kompatibles Paket für Kopf und Fußzeilen
+%% In SEW-MikTex Package scrlayer-scrpage nicht vorhanden
+%\usepackage{scrlayer-scrpage}
+%% Hier wird alternativ das veraltetet Paket scrpage2 verwendet,
+%% das akutell im SEW-Miktex vorhanden ist
+\usepackage{scrpage2}
+
+% den Seitenstil scrheadings aendern
+\pagestyle{scrheadings}
+
+% Definieren von linken und rechten Marken
+% Einseitges Layout 
+\automark[chapter]{section} % Immer Section anzeigen, falls keine Section begonnen, dann Kapitel
+
+%\clearpairofpagestyles % Defaulteinstellungen von scrheadings löschen
+%\clearscrheadfoot % alternativer scrpage2-Befehl
+
+% Platzieren der Marken (o: außen c: mitte i:innen, einseitig = rechte Seite)
+\ihead{\headmark} % automatisches platzieren der Marken auf Innenseite
+%\ohead{Name} % automatisches platzieren der Seitenzahl auf Außenseite
+\chead{}
+
+% Trennstriche Setzen (Funktioniert nur nach Einsetteln der Kopf- und Fußzeile)
+%\KOMAoptions{headsepline=true} % Trennstrich Kopfzeile einschalten
+\setheadsepline{0.5pt} % alternativer scrpage2-Befehl
+%\KOMAoptions{footsepline=true} % Trennstrich Fußzeile einschalten
+
+%% Ausgabetreiber
+%\KOMAoptions{pagesize=off} % entweder off oder bei ungünstiger Ausgabe auto
+
+%% Inhaltsverzeichnis
+\KOMAoptions{toc=listof} % Abbildungs- und Tabellenverzeichnis zu Inhaltsverzeichnis hinzufügen
+\PassOptionsToPackage{toc=bib}{biblatex} % Workaround Literaturverzeichnis zu Inhaltsverzeichnis hinzufügen
+%\KOMAoptions{toc=bibliography} % Eigentlich von KOMA-Script vorgesehene Schnittstelle
+\KOMAoptions{numbers=noenddot} % Entfernt Endpunkte bei Nummerierung von Überschriften (Erscheinen zum Beispiel wenn \part{} verwendet wird)

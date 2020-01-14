@@ -1,0 +1,60 @@
+\ifglsentryexists{affe}{}%
+{%
+\gls@defglossaryentry{affe}%
+{%
+name={Affe},%
+sort={Affe},%
+type={main},%
+first={Affe},%
+firstplural={Affes},%
+text={Affe},%
+plural={Affes},%
+description={lebt auf Land},%
+descriptionplural={lebt auf Land},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={},%
+longplural={},%
+short={},%
+shortplural={},%
+counter={page},%
+parent={},%
+%
+}%
+}%
+\ifglsentryexists{bieber}{}%
+{%
+\gls@defglossaryentry{bieber}%
+{%
+name={Bieber},%
+sort={Bieber},%
+type={main},%
+first={Bieber},%
+firstplural={Biebers},%
+text={Bieber},%
+plural={Biebers},%
+description={lebt manchmal auf Land},%
+descriptionplural={lebt manchmal auf Land},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={},%
+longplural={},%
+short={},%
+shortplural={},%
+counter={page},%
+parent={},%
+%
+}%
+}%

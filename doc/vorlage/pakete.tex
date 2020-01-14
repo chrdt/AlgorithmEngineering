@@ -1,0 +1,86 @@
+%% Definition der Codierung des Editors (sollte mit Editor übereinstimmen)
+\usepackage[utf8]{inputenc} % verwende utf8 oder latin1
+\usepackage{pgfplots}
+%% Definition der Fonts in westeuropäischer Codierung
+\usepackage[T1]{fontenc} % zur verbesserten Wortrennung
+\usepackage{setspace}
+%% Ändern der Spracheinstellung von LaTex auf deutsch 
+\usepackage[ngerman]{babel}
+\usepackage{float} 
+\usepackage{pdflscape}
+\usepackage{amssymb}
+\makeatletter 
+\renewcommand\paragraph{\@startsection{paragraph}{4}{\z@}% 
+	{-3.25ex\@plus -1ex \@minus -.2ex}% 
+	{1.5ex \@plus .2ex}% 
+	{\normalfont\normalsize\bfseries}} 
+\makeatother
+%Zur Verwendung von Acronymen
+\usepackage{acronym}
+%% Verbesserter Zeilenumbruch durch Veränderung der Buchstabgröße
+%\usepackage{microtype}
+
+%% Korrektes Setzen fremdsprachlicher Anführungszeichen
+\usepackage{csquotes}
+
+%% Automatische Verlinkungen
+\usepackage{hyperref}
+
+%% Tabellen für wissenschaftliche Publikationen
+\usepackage{booktabs}
+% Mehrseitige Tabellen
+%\usepackage{longtable}
+\usepackage{color}
+\usepackage{transparent}
+%% Mathe-Pakete
+\usepackage{amsmath} % Wichtige Mathematikfunktionalität (z.B. align)
+%\usepackage{amstext} % Falls \text{} in Mathe-Umgebung nicht gut formatiert wird
+\usepackage{amsfonts} % andere Schriftwarten für Mathe-Umgebungen
+\usepackage{amssymb} % andere Symbole für Mathe-Umgebungen
+
+%% Grafiken
+\usepackage{graphicx} % für \includegraphics[]{}
+
+% Parameter H für erzwingen von float-Positionen
+%\usepackage{float}
+
+% Tikz/PGF
+\usepackage{tikz}
+%% In SEW-MikTex Package tikzscale nicht vorhanden
+%\usepackage{tikzscale} % Ermöglicht Einbinden und Skalierung von .tikz-Dateien mit \includegraphics
+%\usetikzlibrary{external} % Ermöglicht vorkompilieren von tikz auf pdf
+%\tikzexternalize[prefix=tikzexternal/] % TeXLive: -shell-escape MikTex: -enable-write18, prefix=Speicherordner für vorkompilierte PDFs
+% Bestimmte libraries einbinden
+%\usetikzlibrary{patterns}
+
+%% Literaturverzeichnis
+\input{vorlage/biblatex_config.tex}
+
+%% Quellcode einbinden
+\usepackage{listings}
+%\usepackage{mdframed} % automatische Seitenumbrüche bei Boxen
+\usepackage{xcolor}
+% Definitionen für Listing
+%\definecolor{mygreen}{rgb}{0.133,0.545,0.133}
+%\definecolor{mypurple}{rgb}{0.627,0.126,0.941}
+%\lstset
+%{
+%	language=Matlab, 
+%	breaklines=true,
+%	basicstyle=\ttfamily,
+%	showstringspaces=false,
+%	captionpos=t,
+%	keywordstyle=\color{blue}\bfseries\sffamily,
+%	commentstyle=\color{mygreen}\slshape,
+%	stringstyle=\color{mypurple},
+%	prebreak=\mbox{$\hookleftarrow$},
+%	belowcaptionskip=1em
+%}
+
+% Geometry: Nur wenn Satzspiegelberechnung von KOMA-Script missachtet werden soll
+%\usepackage{geometry}
+
+% Einheiten, lädt automatisch nicefrac
+%\usepackage{units}
+
+%\usepackage{lipsum}

@@ -5,6 +5,8 @@ from time import gmtime, strftime
 Uses pygal to draw runtime graphs
 Not used anymore
 """
+
+
 class PlotLine(object):
     def __init__(self):
         self.graph = Line()

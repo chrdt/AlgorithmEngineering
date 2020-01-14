@@ -1,0 +1,124 @@
+%% KOMA-Script Vorlage:
+%
+% Verwendung von biblatex mit Backend biber, sowie tikzexternalize
+% (Befehle müssen abhängig von Distribution und Editor angepasst werden)
+%
+%% KOMA-Script enthält:
+%
+%		scrartcl mit Defaults: 11pt,notitlepage
+%
+%		scrreprt mit Defaults: 11pt,titlepage
+%
+%		scrbook mit Defaults: 11pt,titlepage
+%
+%% Auswahl der Dokumentenklasse nach obiger Tabelle
+\documentclass{scrbook}
+\setlength{\parskip}{1em}
+\setlength{\parindent}{0pt}
+%% Formatierung des Dokuments
+
+% Entwurfsmodus Ein- und Ausschalten
+\KOMAoptions{draft=false}
+
+% Schriftgröße (10pt,11pt,12pt)
+\KOMAoptions{fontsize=12pt}
+% KOMA-Options und scrlayer-scrpage einbinden
+\input{vorlage/komaoptions.tex}
+
+% Schriftart
+\usepackage{lmodern} % Verbesserung des Defaults Computer Modern (CM)
+\addtokomafont{disposition}{\rmfamily} % Ändern der Schriftfamilie aller Gliederungsüberschriften zu Roman/Antiqua/serifenlose Schrift
+
+%% Manuelle Silbentrennung
+\input{vorlage/silbentrennung}
+
+% Eigene Befehle
+\input{vorlage/befehle}
+
+%% zusätzliche Verwendete Pakete
+\input{vorlage/pakete} 
+\newcommand*{\quelle}{% 
+	\footnotesize Quelle: 
+}
+
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amstext}
+\usepackage{amsfonts}
+\usepackage{mathrsfs}
+\usepackage[ngerman]{babel}
+\usepackage{tikz}
+\usetikzlibrary{math}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[toc]{glossaries}
+
+\makeglossaries
+
+\input{kapitel/abkürzungsverzeichnis/abkürzungsverzeichnis}
+
+\definecolor{bluekeywords}{rgb}{0.13,0.13,1}
+\definecolor{greencomments}{rgb}{0,0.5,0}
+\definecolor{redstrings}{rgb}{0.9,0,0}
+
+\lstset{
+frame=single,
+xleftmargin={0.75cm},
+framexleftmargin=20pt,
+stepnumber=1,
+numbers=left,
+numberstyle=\scriptsize,
+belowcaptionskip=\bigskipamount,
+captionpos=b,
+escapeinside={@/}{/@},
+language={},
+tabsize=2,
+emphstyle={\bf},
+commentstyle=\it,
+stringstyle=\color{redstrings},
+showspaces=false,
+keywordstyle=\color{bluekeywords}\bfseries,
+columns=flexible,
+basicstyle=\ttfamily,
+showstringspaces=false,
+showtabs=false,
+breaklines=true,
+breakatwhitespace=true
+}
+
+\lstset{literate=%
+	{Ö}{{\"O}}1
+	{Ü}{{\"U}}1
+	{Ä}{{\"A}}1
+	{ö}{{\"ö}}1
+	{ü}{{\"ü}}1
+	{ä}{{\"ä}}1
+}
+
+
+% Erneutes Ausführen der Satzspiegelberechnung
+\recalctypearea
+\setcounter{tocdepth}{3}  
+\setcounter{secnumdepth}{3}
+\begin{document}
+	\pagenumbering{roman}
+	\input{titelseiten/titelseite.tex}
+	\pagenumbering{gobble}
+	\tableofcontents
+	\clearpage
+	\frontmatter
+	\pagenumbering{Roman}
+	
+	\mainmatter
+	\onehalfspacing
+	\input{kapitel/kapitel1}
+	
+	\clearpage
+	\pagenumbering{Alph}
+	
+	\backmatter
+\end{document}
+%

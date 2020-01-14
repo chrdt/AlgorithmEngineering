@@ -1,0 +1,54 @@
+%% biblatex Konfiguration
+\usepackage[
+style=alphabetic, % gemeinsamer Befehl für citestyle und bibstyle (numeric,alphabetic)
+% Nur verwenden wenn unterschiedlicher citestyle und bibstyle notwendig
+%citestyle=alphabetic, % Aussehen des \cite-Befels (numeric,alphabetic)
+%bibstyle=alphabetic, % Aussehen des \printbibliography-Befels (numeric,alphabetic)
+%doi=false,isbn=false,url=false,eprint=false,% Unterdrücken von jew. Angaben in Literaturverzeichnis
+%giveninits=true, % Vornamen abkürzen
+backref=true, % Rückverlinkung in Literaturliste, benötigt hyperref
+hyperref, % Hyperlinks in Zitaten, benötigt hyperref
+%maxcitenames=1,% Max. Anzahl von Autorennamen in \cite
+%maxbibnames=3,% Max. Anzahl von Autorennamen in Literaturverzeichnis
+%uniquelist=minyear, % ermöglicht eine unterscheidung der Labels, wenn sie durch die Vorigen Befehle uneindeutig geworden sind
+sorting=none,
+backend=biber% generell nicht verändern
+]{biblatex}
+
+%% Verzeichnis der .bib-Datei
+\addbibresource{literatur/literaturverzeichnis.bib}
+
+%% Sonstige Einstellungen
+
+%%%bibliography clean-up
+%\AtEveryBibitem{% Clean up the reference list rather than editing the entries
+%	\clearlist{address}
+%	\clearlist{location}
+%	\clearfield{date}
+%	\clearfield{month}
+%	\clearfield{series}
+%	
+%	\ifentrytype{book}{}{% Remove publisher and editor except for books
+%		\clearlist{publisher}
+%		\clearname{editor}
+%	}
+%}
+%% END bibliography clean-up
+%
+%% BEGIN citation clean-up (e.g. for full citations of own publications in project reports)
+%\AtEveryCitekey{% Clean up citations rather than editing the entries
+%	\clearname{editor}%
+%}
+%% END citation clean-up
+%
+%% BEGIN squeeze space in bibliography by replacing strings
+%\DeclareSourcemap{ 
+%	\maps[datatype=bibtex]{% If you have to squeeze space do it here not in the entries!
+%		\map{
+%			\step[fieldsource=series, match=Lecture Notes in Computer Science, replace=LNCS]
+%			\step[fieldsource=publisher, match=\regexp{Gesellschaft .* Informatik}, replace=GI]
+%			\step[fieldsource=publisher, match=\regexp{ \(GI\)}, replace=]           
+%		}
+%	}      
+%}
+%% END squeeze space in bibliography by replacing strings

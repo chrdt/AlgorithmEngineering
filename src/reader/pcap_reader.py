@@ -62,8 +62,6 @@ class AverageFrameLength(PCAPProcessing):
 
     def process(self, frame):
         _group_attributes = ()
-
-
         for func in self._group_funcs:
             try:
                 _group_attributes += (func(frame),)
@@ -156,7 +154,6 @@ class InsertHashTable():
                 src_mac = frame[Dot3].src
             except IndexError:
                 return
-
 
         mac_as_int = int(src_mac.translate(None, ":.-"), 16)
         if not self.hashtable.contains(mac_as_int):
